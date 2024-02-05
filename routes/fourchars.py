@@ -3,6 +3,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, delete
 from typing import List
+from datetime import datetime, timedelta
 
 from models.fourchars import FourChar, FourCharUpdate
 
@@ -44,6 +45,7 @@ async def update_fourchar(id: int, new_data: FourCharUpdate, session=Depends(get
     fourchar = session.get(FourChar, id)
     if fourchar:
         fourchar_data = new_data.model_dump(exclude_unset=True)  # 클라이언트가 작성한 데이터만 변경하는 dict 생성
+        fourchar_data["updated_at"] = (datetime.utcnow() + timedelta(hours=9)).replace(microsecond=0)  # updated_at 컬럼에 업데이트 시간 추가
         for key, value in fourchar_data.items():
             setattr(fourchar, key, value)  # setattr(object, name, value) >>> object에 존재하는 속성의 값을 바꾸거나, 새로운 속성을 생성하여 값을 부여한다.
         session.add(fourchar)

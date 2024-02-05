@@ -1,11 +1,16 @@
 # models/sayings.py
 
 from typing import Optional
-from sqlmodel import Field, DateTime, SQLModel
+from sqlmodel import Field, SQLModel
 
 from datetime import datetime, timedelta
 
-class FourChar(SQLModel, table=True):  # 명언 테이블 클래스
+# datetime의 출력 형태를 설정
+def current_time_kst():
+    return (datetime.utcnow() + timedelta(hours=9)).replace(microsecond=0)  # UTC + 9시간 = 한국 시간
+
+
+class Saying(SQLModel, table=True):  # 명언 테이블 클래스
 
     # 고유 필드
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -16,7 +21,7 @@ class FourChar(SQLModel, table=True):  # 명언 테이블 클래스
     contents_detail: str
 
     type_id: int = Field(default=0, nullable=False)  # 자동생성
-    created_at: Optional[DateTime] = Field(default_factory=lambda: datetime.utcnow()+timedelta(hours=9), nullable=False)  # UTC + 9시(한국 시간)
+    created_at: Optional[datetime] = Field(default_factory=current_time_kst, nullable=False)
     
 
     # 공백 가능 필드
@@ -27,7 +32,7 @@ class FourChar(SQLModel, table=True):  # 명언 테이블 클래스
     author: Optional[str] = None
     continent: Optional[str] = None
 
-    updated_at: Optional[DateTime] = None
+    updated_at: Optional[datetime] = None
 
     # 모델 설정
     model_config = {
@@ -47,7 +52,7 @@ class FourChar(SQLModel, table=True):  # 명언 테이블 클래스
     }
 
 
-class FourCharUpdate(SQLModel):
+class SayingUpdate(SQLModel):
     url_name: Optional[str] = None
     contents_kr: Optional[str] = None
     contents_detail: Optional[str] = None
@@ -58,7 +63,7 @@ class FourCharUpdate(SQLModel):
     contents_divided: Optional[str] = None
     author: Optional[str] = None
     continent: Optional[str] = None
-    update_at: DateTime = Field(default_factory=lambda: datetime.utcnow()+timedelta(hours=9), nullable=False)  # UTC + 9시(한국 시간)
+    # updated_at: datetime = Field(default_factory=current_time_kst, nullable=False)  # 여기서 설정해도 적용이 안되므로 router에서 직접 값을 추가
 
     # 모델 설정
     model_config = {

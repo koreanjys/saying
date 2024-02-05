@@ -2,8 +2,6 @@
 
 from sqlmodel import SQLModel, Session, create_engine
 
-from models.sayings import FourChar
-
 
 # 데이터베이스 환경설정 및 엔진 생성
 
