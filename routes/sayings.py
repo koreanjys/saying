@@ -15,6 +15,9 @@ saying_router = APIRouter(tags=["Sayings"])
 
 @saying_router.get("/", response_model=List[Saying])
 async def retrieve_all_sayings(session=Depends(get_session)) -> List[Saying]:
+    """
+    저장된 모든 명언들 조회
+    """
     statement = select(Saying)
     sayings = session.exec(statement).all()  # 명언 테이블의 모든 값을 sayings에 리스트로 불러옴
     return sayings
@@ -22,6 +25,9 @@ async def retrieve_all_sayings(session=Depends(get_session)) -> List[Saying]:
 
 @saying_router.get("/{id}", response_model=Saying)
 async def retrieve_saying(id: int, session=Depends(get_session)) -> Saying:
+    """
+    명언 조회
+    """
     saying = session.get(Saying, id)
     if saying:
         return saying
@@ -34,6 +40,9 @@ async def retrieve_saying(id: int, session=Depends(get_session)) -> Saying:
 
 @saying_router.post("/new", response_model=Saying)
 async def create_new_saying(new_saying: Saying, session=Depends(get_session)) -> Saying:
+    """
+    명언 새로 생성
+    """
     session.add(new_saying)
     session.commit()
     session.refresh(new_saying)  # 캐시 데이터 업데이트
@@ -42,6 +51,9 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
 
 @saying_router.put("/edit/{id}", response_model=Saying)
 async def update_saying(id: int, new_data: SayingUpdate, session=Depends(get_session)) -> Saying:
+    """
+    명언 수정
+    """
     saying = session.get(Saying, id)
     if saying:
         saying_data = new_data.model_dump(exclude_unset=True)  # 클라이언트가 작성한 데이터만 변경하는 dict 생성
@@ -60,6 +72,9 @@ async def update_saying(id: int, new_data: SayingUpdate, session=Depends(get_ses
 
 @saying_router.delete("/delete/{id}")
 async def delete_saying(id: int, session=Depends(get_session)) -> dict:
+    """
+    명언 삭제
+    """
     saying = session.get(Saying, id)
     if saying:
         session.delete(saying)

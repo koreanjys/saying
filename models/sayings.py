@@ -12,11 +12,11 @@ def current_time_kst():
 
 class Saying(SQLModel, table=True):  # 명언 테이블 클래스
 
-    # 고유 필드
+    # PK_ID
     id: Optional[int] = Field(default=None, primary_key=True)
 
     # 필수 필드
-    url_name: str
+    category: str
     contents_kr: str
     contents_detail: str
 
@@ -25,7 +25,7 @@ class Saying(SQLModel, table=True):  # 명언 테이블 클래스
     
 
     # 공백 가능 필드
-    category: Optional[str] = None
+    url_name: Optional[str] = None
     contents_eng: Optional[str] = None
     contents_zh: Optional[str] = None
     contents_divided: Optional[str] = None

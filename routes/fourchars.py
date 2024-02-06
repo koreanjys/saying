@@ -13,8 +13,12 @@ from database.connection import get_session
 fourchar_router = APIRouter(tags=["FourChars"])
 
 
+## CRUD START ############################################################################################## 
 @fourchar_router.get("/", response_model=List[FourChar])
 async def retrieve_all_fourchars(session=Depends(get_session)) -> List[FourChar]:
+    """
+    저장된 모든 사자성어들 조회
+    """
     statement = select(FourChar)
     fourchars = session.exec(statement).all()  # 사자성어 테이블의 모든 값을 fourchars에 리스트로 불러옴
     return fourchars
@@ -22,6 +26,9 @@ async def retrieve_all_fourchars(session=Depends(get_session)) -> List[FourChar]
 
 @fourchar_router.get("/{id}", response_model=FourChar)
 async def retrieve_fourchar(id: int, session=Depends(get_session)) -> FourChar:
+    """
+    사자성어 조회
+    """
     fourchar = session.get(FourChar, id)
     if fourchar:
         return fourchar
@@ -34,6 +41,9 @@ async def retrieve_fourchar(id: int, session=Depends(get_session)) -> FourChar:
 
 @fourchar_router.post("/new", response_model=FourChar)
 async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_session)) -> FourChar:
+    """
+    사자성어 새로 생성
+    """
     session.add(new_fourchar)
     session.commit()
     session.refresh(new_fourchar)  # 캐시 데이터 업데이트
@@ -42,6 +52,9 @@ async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_sessio
 
 @fourchar_router.put("/edit/{id}", response_model=FourChar)
 async def update_fourchar(id: int, new_data: FourCharUpdate, session=Depends(get_session)) -> FourChar:
+    """
+    사자성어 수정
+    """
     fourchar = session.get(FourChar, id)
     if fourchar:
         fourchar_data = new_data.model_dump(exclude_unset=True)  # 클라이언트가 작성한 데이터만 변경하는 dict 생성
@@ -60,6 +73,9 @@ async def update_fourchar(id: int, new_data: FourCharUpdate, session=Depends(get
 
 @fourchar_router.delete("/delete/{id}")
 async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
+    """
+    사자성어 삭제
+    """
     fourchar = session.get(FourChar, id)
     if fourchar:
         session.delete(fourchar)
@@ -72,3 +88,4 @@ async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
         status_code=status.HTTP_404_NOT_FOUND,
         detail="선택한 ID를 가진 사자성어가 존재하지 않습니다."
     )
+## CRUD END ##############################################################################################

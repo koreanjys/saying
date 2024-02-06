@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 import uvicorn
 from contextlib import asynccontextmanager
 
-from database.connection import Settings
+from database.connection import conn
 
 from routes.sayings import saying_router
 from routes.fourchars import fourchar_router
@@ -15,7 +15,7 @@ from routes.fourchars import fourchar_router
 @asynccontextmanager
 async def lifesapn(app: FastAPI):
     # 앱 시작 시 작동되는 코드 작성
-    Settings.conn()  # DB 연결 및 초기화
+    conn()  # DB 연결 및 초기화
 
     yield
     # 앱 종료 시 작동되는 코드 작성
