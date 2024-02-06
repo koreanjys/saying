@@ -7,7 +7,6 @@ from typing import Optional
 # # 데이터베이스 접속 환경설정
 class Settings(BaseSettings):
     DATABASE_CONNECTION_STRING: Optional[str] = None  # DB 연결주소, .env파일에서 불러온다.
-    connect_args: dict = {"check_same_thread": False}  # False: 여러 쓰레드에서 동일한 연결을 공유
 
     model_config = SettingsConfigDict(env_file=".env")
 
