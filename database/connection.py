@@ -7,11 +7,10 @@ from typing import Optional
 # # 데이터베이스 접속 환경설정
 class Settings(BaseSettings):
     DATABASE_CONNECTION_STRING: Optional[str] = None  # DB 연결주소, .env파일에서 불러온다.
-
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()  # 환경변수
-engine_url = create_engine(url=settings.DATABASE_CONNECTION_STRING, connect_args=settings.connect_args, echo=True)  # DB 엔진 생성
+engine_url = create_engine(url=settings.DATABASE_CONNECTION_STRING, echo=True)  # DB 엔진 생성
 
 
 def conn():
