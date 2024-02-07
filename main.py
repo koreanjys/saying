@@ -10,6 +10,8 @@ from database.connection import conn
 from routes.sayings import saying_router
 from routes.fourchars import fourchar_router
 
+from starlette.middleware.cors import CORSMiddleware
+
 
 # lifesapn : 어플리케이션 시작과 종료 시 실행되는 프로세스 작성
 @asynccontextmanager
@@ -22,6 +24,20 @@ async def lifesapn(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifesapn)  # FastAPI 인스턴스 생성
+
+
+# CORS 설정(허가할 origin 주소를 리스트에 추가)
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # 라우트 등록
@@ -37,4 +53,4 @@ async def main():
 
 # uvicorn 앱 실행
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
