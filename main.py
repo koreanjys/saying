@@ -47,8 +47,10 @@ app.include_router(fourchar_router, prefix="/fourchar")
 
 # 첫 화면
 @app.get("/")
-async def main():
-    return RedirectResponse(url="/saying/")
+async def main() -> dict:
+    return {
+        "message": "명언 조회 URL 입니다."
+    }
 
 
 # uvicorn 앱 실행
