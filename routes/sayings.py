@@ -13,7 +13,7 @@ from database.connection import get_session
 saying_router = APIRouter(tags=["Sayings"])
 
 
-@saying_router.get("/", Dict[str, List[Saying]])
+@saying_router.get("/", response_model=Dict[str, List[Saying]])
 async def retrieve_all_sayings(session=Depends(get_session)) -> Dict[str, List[Saying]]:
     """
     저장된 명언 데이터들 조회
