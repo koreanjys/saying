@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, delete
-from typing import List
+from typing import List, Dict
 from datetime import datetime, timedelta
 
 from models.fourchars import FourChar, FourCharUpdate
@@ -14,14 +14,14 @@ fourchar_router = APIRouter(tags=["FourChars"])
 
 
 ## CRUD START ############################################################################################## 
-@fourchar_router.get("/", response_model=List[FourChar])
-async def retrieve_all_fourchars(session=Depends(get_session)) -> List[FourChar]:
+@fourchar_router.get("/", response_model=Dict[str, List[FourChar]])
+async def retrieve_all_fourchars(session=Depends(get_session)) -> Dict[str, List[FourChar]]:
     """
     저장된 모든 사자성어들 조회
     """
     statement = select(FourChar)
     fourchars = session.exec(statement).all()  # 사자성어 테이블의 모든 값을 fourchars에 리스트로 불러옴
-    return fourchars
+    return {"content": fourchars}
 
 
 @fourchar_router.get("/{id}", response_model=FourChar)
