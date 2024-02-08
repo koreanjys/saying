@@ -16,7 +16,7 @@ saying_router = APIRouter(tags=["Sayings"])
 @saying_router.get("/", response_model=List[Saying])
 async def retrieve_all_sayings(session=Depends(get_session)) -> List[Saying]:
     """
-    저장된 모든 데이터들 조회
+    저장된 명언 데이터들 조회
     """
     statement = select(Saying)
     sayings = session.exec(statement).all()  # 데이터 테이블의 모든 값을 sayings에 리스트로 불러옴
