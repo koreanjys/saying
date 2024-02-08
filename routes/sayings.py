@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, delete
-from typing import List
+from typing import List, Dict
 from datetime import datetime, timedelta
 
 from models.sayings import Saying, SayingUpdate
@@ -13,14 +13,14 @@ from database.connection import get_session
 saying_router = APIRouter(tags=["Sayings"])
 
 
-@saying_router.get("/", response_model=List[Saying])
-async def retrieve_all_sayings(session=Depends(get_session)) -> List[Saying]:
+@saying_router.get("/", Dict[str, List[Saying]])
+async def retrieve_all_sayings(session=Depends(get_session)) -> Dict[str, List[Saying]]:
     """
     저장된 명언 데이터들 조회
     """
     statement = select(Saying)
     sayings = session.exec(statement).all()  # 데이터 테이블의 모든 값을 sayings에 리스트로 불러옴
-    return sayings
+    return {"content": sayings}
 
 
 @saying_router.get("/{id}", response_model=Saying)
