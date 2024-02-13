@@ -9,6 +9,7 @@ from database.connection import conn
 
 from routes.sayings import saying_router
 from routes.fourchars import fourchar_router
+from database.connection import settings
 
 from starlette.middleware.cors import CORSMiddleware
 
@@ -55,4 +56,4 @@ async def main() -> dict:
 
 # uvicorn 앱 실행
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=5555, reload=True)
+    uvicorn.run("main:app", host=settings.UVICORN_IP, port=settings.UVICORN_PORT, reload=True)

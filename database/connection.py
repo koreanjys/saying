@@ -7,6 +7,9 @@ from typing import Optional
 # # 데이터베이스 접속 환경설정
 class Settings(BaseSettings):
     DATABASE_CONNECTION_STRING: Optional[str] = None  # DB 연결주소, .env파일에서 불러온다.
+    UVICORN_IP: Optional[str] = None  # uvicorn ip번호
+    UVICORN_PORT: Optional[int] = None  # uvicorn port번호
+
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()  # 환경변수
