@@ -1,7 +1,7 @@
 # routes/fourchars.py
 
-from fastapi import APIRouter, HTTPException, status, Depends
-from sqlmodel import select, delete
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from sqlmodel import select, delete, func
 from typing import List, Dict
 from datetime import datetime, timedelta
 
@@ -15,14 +15,26 @@ fourchar_router = APIRouter(tags=["FourChars"])
 
 
 ## CRUD START ############################################################################################## 
-@fourchar_router.get("/", response_model=Dict[str, List[FourChar]])
-async def retrieve_all_fourchars(session=Depends(get_session)) -> Dict[str, List[FourChar]]:
+@fourchar_router.get("", response_model=dict)
+async def retrieve_all_fourchars(p: int=Query(default=1), session=Depends(get_session)) -> dict:
     """
     저장된 모든 사자성어들 조회
     """
-    statement = select(FourChar).order_by(FourChar.id.desc()).limit(100)
-    fourchars = session.exec(statement).all()  # 사자성어 테이블의 모든 값을 fourchars에 리스트로 불러옴
-    return {"content": fourchars}
+    # 페이징 처리
+    page = p
+    unit_per_page = 15  # 페이지당 보여질 데이터 수
+    offset = (page - 1) * unit_per_page
+    statement = select(FourChar).offset(offset).limit(unit_per_page).order_by(FourChar.id.desc())
+    fourchars = session.exec(statement).all()
+
+    # 토탈페이지 확인
+    total_record = session.exec(select(func.count(FourChar.id))).one()
+    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+
+    return {
+        "total_page": total_page,
+        "content": fourchars
+    }
 
 
 @fourchar_router.get("/{id}", response_model=FourChar)
@@ -48,7 +60,7 @@ async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_sessio
     category_name = new_fourchar.category
 
     statement = select(Category).where(Category.name == category_name)
-    category = session.exec(statement).one()
+    category = session.exec(statement).first()
 
     if not category:
         category = Category(name=category_name)

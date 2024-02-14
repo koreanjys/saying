@@ -1,7 +1,8 @@
 # routes/sayings.py
 
-from fastapi import APIRouter, HTTPException, status, Depends, Path
-from sqlmodel import select, delete
+from fastapi import APIRouter, HTTPException, status, Depends, Query
+from fastapi.responses import RedirectResponse
+from sqlmodel import select, delete, func
 from typing import List, Dict
 from datetime import datetime, timedelta
 
@@ -15,14 +16,26 @@ saying_router = APIRouter(tags=["Sayings"])
 
 
 ## CRUD START ############################################################################################## 
-@saying_router.get("/", response_model=Dict[str, List[Saying]])
-async def retrieve_all_sayings(session=Depends(get_session)) -> Dict[str, List[Saying]]:
+@saying_router.get("", response_model=dict)
+async def retrieve_all_sayings(p: int=Query(default=1), session=Depends(get_session)) -> dict:
     """
     저장된 명언 데이터들 조회
     """
-    statement = select(Saying).order_by(Saying.id.desc()).limit(100)
-    sayings = session.exec(statement).all()  # 데이터 테이블의 모든 값을 sayings에 리스트로 불러옴
-    return {"content": sayings}
+    # 페이징 처리
+    page = p
+    unit_per_page = 15  # 페이지당 보여질 데이터 수
+    offset = (page - 1) * unit_per_page
+    statement = select(Saying).offset(offset).limit(unit_per_page).order_by(Saying.id.desc())
+    sayings = session.exec(statement).all()
+
+    # 토탈 페이지 확인
+    total_record = session.exec(select(func.count(Saying.id))).one()
+    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+
+    return {
+        "total_page": total_page,
+        "content": sayings
+    }
 
 
 @saying_router.get("/{id}", response_model=Saying)
@@ -48,7 +61,7 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
     category_name = new_saying.category
 
     statement = select(Category).where(Category.name == category_name)
-    category = session.exec(statement).one()
+    category = session.exec(statement).first()
 
     if not category:
         category = Category(name=category_name)
@@ -103,3 +116,6 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
 ## CRUD END ##############################################################################################
 
 # 필터링
+@saying_router.post("/filter")
+async def filtering(body: List[dict], session=Depends(get_session)):
+    return body
