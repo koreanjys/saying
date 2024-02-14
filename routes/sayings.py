@@ -1,7 +1,6 @@
 # routes/sayings.py
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
-from fastapi.responses import RedirectResponse
 from sqlmodel import select, delete, func
 from typing import List, Dict
 from datetime import datetime, timedelta
