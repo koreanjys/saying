@@ -6,6 +6,7 @@ from typing import List, Dict
 from datetime import datetime, timedelta
 
 from models.fourchars import FourChar, FourCharUpdate
+from models.category import Category
 
 from database.connection import get_session
 
@@ -19,7 +20,7 @@ async def retrieve_all_fourchars(session=Depends(get_session)) -> Dict[str, List
     """
     저장된 모든 사자성어들 조회
     """
-    statement = select(FourChar)
+    statement = select(FourChar).order_by(FourChar.id.desc()).limit(100)
     fourchars = session.exec(statement).all()  # 사자성어 테이블의 모든 값을 fourchars에 리스트로 불러옴
     return {"content": fourchars}
 
@@ -44,6 +45,17 @@ async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_sessio
     """
     사자성어 새로 생성
     """
+    category_name = new_fourchar.category
+
+    statement = select(Category).where(Category.name == category_name)
+    category = session.exec(statement).one()
+
+    if not category:
+        category = Category(name=category_name)
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+
     session.add(new_fourchar)
     session.commit()
     session.refresh(new_fourchar)  # 캐시 데이터 업데이트
@@ -89,3 +101,5 @@ async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
         detail="선택한 ID를 가진 사자성어가 존재하지 않습니다."
     )
 ## CRUD END ##############################################################################################
+
+# 필터링

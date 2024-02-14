@@ -15,34 +15,35 @@ class FourChar(SQLModel, table=True):  # 사자성어 테이블 클래스
     # PK_ID
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    # 필수 필드
-    contents_kr: str
-    contents_detail: str
+    # 사용 필드
+    contents_kr: str                   # 사자성어(한글)*
+    category: str                      # 카테고리*
+    contents_divided: str              # 뜻 풀이*
+    contents_zh: str = ""              # 사자성어(한문)
 
-    type_id: int = Field(default=1, nullable=False)  # 자동생성
-    use_yn: int = Field(default=1, nullable=False)  # 자동생성
+    # 자동생성 필드
+    type_id: int = 1
+    use_yn: int = 1
+    created_at: datetime = Field(default_factory=current_time_kst)
     
 
-    # 공백 가능 필드
-    created_at: Optional[datetime] = Field(default_factory=current_time_kst, nullable=True)  # 자동생성
-    category: Optional[str] = None
-    url_name: Optional[str] = None
-    contents_eng: Optional[str] = None
-    contents_zh: Optional[str] = None
-    contents_divided: Optional[str] = None
-    author: Optional[str] = None
-    continent: Optional[str] = None
-
+    # 미사용 필드
+    contents_detail: str = ""
+    url_name: str = ""
+    contents_eng: str = ""
+    author: str = ""
+    continent: str = ""
     updated_at: Optional[datetime] = None
+
 
     #모델 설정
     model_config = {
         "json_schema_extra": {
             "example": {
-                "category": "*사자성어 분류(예시: 인생)",
-                "contents_kr": "*사자성어 원본을 한국어로 작성",
-                "contents_detail": "*사자성어 원본을 해석",
-                "contents_zh": "사자성어 원본을 한문으로 작성",
+                "category": "카테고리*",
+                "contents_kr": "사자성어(한글)*",
+                "contents_zh": "사자성어(한문)",
+                "contents_divided": "뜻 풀이*"
             }
         }
     }

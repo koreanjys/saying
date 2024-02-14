@@ -1,11 +1,12 @@
 # routes/sayings.py
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Path
 from sqlmodel import select, delete
 from typing import List, Dict
 from datetime import datetime, timedelta
 
 from models.sayings import Saying, SayingUpdate
+from models.category import Category
 
 from database.connection import get_session
 
@@ -13,12 +14,13 @@ from database.connection import get_session
 saying_router = APIRouter(tags=["Sayings"])
 
 
+## CRUD START ############################################################################################## 
 @saying_router.get("/", response_model=Dict[str, List[Saying]])
 async def retrieve_all_sayings(session=Depends(get_session)) -> Dict[str, List[Saying]]:
     """
     저장된 명언 데이터들 조회
     """
-    statement = select(Saying)
+    statement = select(Saying).order_by(Saying.id.desc()).limit(100)
     sayings = session.exec(statement).all()  # 데이터 테이블의 모든 값을 sayings에 리스트로 불러옴
     return {"content": sayings}
 
@@ -43,6 +45,17 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
     """
     데이터 새로 생성
     """
+    category_name = new_saying.category
+
+    statement = select(Category).where(Category.name == category_name)
+    category = session.exec(statement).one()
+
+    if not category:
+        category = Category(name=category_name)
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+
     session.add(new_saying)
     session.commit()
     session.refresh(new_saying)  # 캐시 데이터 업데이트
@@ -87,3 +100,6 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
         status_code=status.HTTP_404_NOT_FOUND,
         detail="선택한 ID를 가진 데이터가 존재하지 않습니다."
     )
+## CRUD END ##############################################################################################
+
+# 필터링

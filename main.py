@@ -9,6 +9,8 @@ from database.connection import conn
 
 from routes.sayings import saying_router
 from routes.fourchars import fourchar_router
+from routes.category import category_router
+
 from database.connection import settings
 
 from starlette.middleware.cors import CORSMiddleware
@@ -44,6 +46,7 @@ app.add_middleware(
 # 라우트 등록
 app.include_router(saying_router, prefix="/saying")
 app.include_router(fourchar_router, prefix="/fourchar")
+app.include_router(category_router, prefix="/category")
 
 
 # 첫 화면
