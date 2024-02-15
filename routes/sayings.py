@@ -1,8 +1,8 @@
 # routes/sayings.py
 
-from fastapi import APIRouter, HTTPException, status, Depends, Query
+from fastapi import APIRouter, HTTPException, status, Depends, Query, Body
 from sqlmodel import select, delete, func
-from typing import List, Dict
+from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 
 from models.sayings import Saying, SayingUpdate
@@ -115,6 +115,23 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
 ## CRUD END ##############################################################################################
 
 # 필터링
+@saying_router.get("/filter")
+async def filtering(categories: Optional[List[str]]=None, keyword: Optional[str]=None, chars: Optional[List[str]]=None , session=Depends(get_session)):
+    queries = {}
+    if categories:
+        queries["categories"] = categories
+    if keyword:
+        queries["search"] = keyword
+    if chars:
+        queries["chars"] = chars
+
+    with open("./logs/log.txt", "a", encoding="UTF-8") as f:
+        f.write(str(queries)+"\n\n")
+        
+    return queries
+
 @saying_router.post("/filter")
-async def filtering(body: List[dict], session=Depends(get_session)):
+async def filtered(body: dict=Body(), session=Depends(get_session)):
+    with open("./logs/log.txt", "a", encoding="UTF-8") as f:
+        f.write(str(body)+"\n\n")
     return body
