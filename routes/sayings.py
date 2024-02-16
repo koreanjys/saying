@@ -1,8 +1,8 @@
 # routes/sayings.py
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query, Body
-from sqlmodel import select, delete, func
-from typing import List, Dict, Optional, Any
+from sqlmodel import select, delete, func, or_
+from typing import List, Optional
 from datetime import datetime, timedelta
 
 from models.sayings import Saying, SayingUpdate
@@ -59,11 +59,11 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
     """
     category_name = new_saying.category
 
-    statement = select(Category).where(Category.name == category_name)
+    statement = select(Category).where(Category.saying_categories == category_name)
     category = session.exec(statement).first()
 
     if not category:
-        category = Category(name=category_name)
+        category = Category(saying_categories=category_name)
         session.add(category)
         session.commit()
         session.refresh(category)
@@ -114,24 +114,45 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
     )
 ## CRUD END ##############################################################################################
 
-# 필터링
-@saying_router.get("/filter")
-async def filtering(categories: Optional[List[str]]=None, keyword: Optional[str]=None, chars: Optional[List[str]]=None , session=Depends(get_session)):
-    queries = {}
-    if categories:
-        queries["categories"] = categories
-    if keyword:
-        queries["search"] = keyword
-    if chars:
-        queries["chars"] = chars
-
-    with open("./logs/log.txt", "a", encoding="UTF-8") as f:
-        f.write(str(queries)+"\n\n")
+# 프론트엔드 서버에서 쿼리가 잘 날아오는지 확인하기 위한 코드
+# @saying_router.get("/filter/")
+# async def saying_filtering(categories: Optional[List[str]]=Query(default=None), session=Depends(get_session)):
+#     with open("./logs/log.txt", "a", encoding="UTF-8") as f:
+#         f.write("카테고리"+str(categories)+"\n\n")
         
-    return queries
+#     return categories
 
-@saying_router.post("/filter")
-async def filtered(body: dict=Body(), session=Depends(get_session)):
-    with open("./logs/log.txt", "a", encoding="UTF-8") as f:
-        f.write(str(body)+"\n\n")
-    return body
+
+# 필터링 라우터 함수
+@saying_router.get("/filter/", response_model=dict)
+async def saying_filtering(
+        categories: Optional[List[str]]=Query(default=None),
+        keyword: Optional[str]=Query(default=None),
+        chars: Optional[List[str]]=Query(default=None),
+        p: int=Query(default=1),
+        session=Depends(get_session)
+        ) -> dict:
+
+    statement = select(Saying)
+    if categories:
+        conditions = [Saying.category==cat for cat in categories]
+        statement = statement.where(or_(*conditions))
+    if keyword:
+        statement = statement.where(or_(Saying.contents_kr.like(f"%{keyword}%"), Saying.contents_eng.like(f"%{keyword}%")))
+    if chars:
+        conditions = [Saying.contents_eng.ilike(f"{char}%") for char in chars]
+        statement = statement.where(or_(*conditions))
+
+    # 페이징 처리
+    page = p
+    unit_per_page = 15  # 페이지당 보여질 데이터 수
+    offset = (page - 1) * unit_per_page
+    statement = statement.offset(offset).limit(unit_per_page).order_by(Saying.id.desc())
+
+    filtered_sayings = session.exec(statement).all()
+
+    # 토탈 페이지 확인
+    total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
+    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+
+    return {"total_page": total_page, "content": filtered_sayings}

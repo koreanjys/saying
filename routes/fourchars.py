@@ -1,7 +1,7 @@
 # routes/fourchars.py
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
-from sqlmodel import select, delete, func
+from sqlmodel import select, delete, func, or_
 from typing import List, Optional
 from datetime import datetime, timedelta
 
@@ -59,11 +59,11 @@ async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_sessio
     """
     category_name = new_fourchar.category
 
-    statement = select(Category).where(Category.name == category_name)
+    statement = select(Category).where(Category.fourchar_categories == category_name)
     category = session.exec(statement).first()
 
     if not category:
-        category = Category(name=category_name)
+        category = Category(fourchar_categories=category_name)
         session.add(category)
         session.commit()
         session.refresh(category)
@@ -114,18 +114,65 @@ async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
     )
 ## CRUD END ##############################################################################################
 
-# 필터링
-@fourchar_router.get("/filter")
-async def filtering(categories: Optional[List[str]]=None, keyword: Optional[str]=None, chars: Optional[List[str]]=None , session=Depends(get_session)):
-    queries = {}
-    if categories:
-        queries["categories"] = categories
-    if keyword:
-        queries["search"] = keyword
-    if chars:
-        queries["chars"] = chars
+# 프론트엔드에서 쿼리가 잘 날아오는지 확인하기 위한 코드
+"""
+@fourchar_router.get("/filter/")
+async def fourchar_filtering(keyword: Optional[str]=Query(default=None), session=Depends(get_session)):
 
     with open("./logs/log.txt", "a", encoding="UTF-8") as f:
-        f.write(str(queries)+"\n\n")
+        f.write("키워드"+str(keyword)+"\n\n")
         
-    return queries
+    return keyword
+"""
+
+
+# 필터링 라우터 함수
+@fourchar_router.get("/filter/", response_model=dict)
+async def fourchar_filtering(
+        categories: Optional[List[str]]=Query(default=None),
+        keyword: Optional[str]=Query(default=None),
+        chars: Optional[List[str]]=Query(default=None),
+        p: int=Query(default=1),
+        session=Depends(get_session)
+        ) -> dict:
+
+    statement = select(FourChar)
+    if categories:
+        conditions = [FourChar.category==cat for cat in categories]
+        statement = statement.where(or_(*conditions))
+    if keyword:
+        statement = statement.where(FourChar.contents_divided.like(f"%{keyword}%"))
+    if chars:
+        ranges = {
+                "ㄱ": ("가", "깋"),
+                "ㄴ": ("나", "닣"),
+                "ㄷ": ("다", "딯"),
+                "ㄹ": ("라", "맇"),
+                "ㅁ": ("마", "밓"),
+                "ㅂ": ("바", "빟"),
+                "ㅅ": ("사", "싷"),
+                "ㅇ": ("아", "잏"),
+                "ㅈ": ("자", "짛"),
+                "ㅊ": ("차", "칳"),
+                "ㅋ": ("카", "킿"),
+                "ㅌ": ("타", "팋"),
+                "ㅍ": ("파", "핗"),
+                "ㅎ": ("하", "힣"),
+                }
+
+        conditions = [FourChar.contents_kr.like(f"{char}%") for char in chars]
+        statement = statement.where(or_(*conditions))
+
+    # 페이징 처리
+    page = p
+    unit_per_page = 15  # 페이지당 보여질 데이터 수
+    offset = (page - 1) * unit_per_page
+    statement = statement.offset(offset).limit(unit_per_page).order_by(FourChar.id.desc())
+
+    filtered_fourchars = session.exec(statement).all()
+
+    # 토탈 페이지 확인
+    total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
+    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+
+    return {"total_page": total_page, "content": filtered_fourchars}

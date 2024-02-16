@@ -16,10 +16,10 @@ class FourChar(SQLModel, table=True):  # 사자성어 테이블 클래스
     id: Optional[int] = Field(default=None, primary_key=True)
 
     # 사용 필드
-    contents_kr: str                   # 사자성어(한글)*
-    category: str                      # 카테고리*
-    contents_divided: str              # 뜻 풀이*
-    contents_zh: str = ""              # 사자성어(한문)
+    contents_kr: str = Field(index=True)       # 사자성어(한글)*
+    category: str = Field(index=True)          # 카테고리*
+    contents_divided: str = Field(index=True)  # 뜻 풀이*
+    contents_zh: str = ""                      # 사자성어(한문)
 
     # 자동생성 필드
     type_id: int = 1
