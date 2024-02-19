@@ -32,6 +32,7 @@ async def retrieve_all_sayings(p: int=Query(default=1), size: int=Query(default=
     total_page = (total_record // size) + bool(total_record % size)
 
     return {
+        "total_rows": total_record,
         "total_page": total_page,
         "content": sayings
     }
@@ -146,4 +147,8 @@ async def saying_filtering(
     total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
     total_page = (total_record // size) + bool(total_record % size)
 
-    return {"total_page": total_page, "content": filtered_sayings}
+    return {
+        "total_rows": total_record,
+        "total_page": total_page,
+        "content": filtered_sayings
+    }

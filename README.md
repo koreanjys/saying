@@ -1,6 +1,3 @@
-# saying
-CRUD board in dangam
+# 명언, 사자성어 게시판 백엔드(FastAPI 기반)
 
-## 간단한 게시판
-
-MYSQL과 연동 가능한 FastAPI 기반 CRUD 게시판
+## 1. 구조

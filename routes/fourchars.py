@@ -33,6 +33,7 @@ async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(defaul
     total_page = (total_record // size) + bool(total_record % size)
 
     return {
+        "total_rows": total_record,
         "total_page": total_page,
         "content": fourchars
     }
@@ -162,4 +163,8 @@ async def fourchar_filtering(
     total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
     total_page = (total_record // size) + bool(total_record % size)
     
-    return {"total_page": total_page, "content": filtered_fourchars}
+    return {
+        "total_rows": total_record,
+        "total_page": total_page,
+        "content": filtered_fourchars
+    }
