@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from models.sayings import Saying, SayingUpdate
 from models.category import Category
+from tools.pagination import paging
 
 from database.connection import get_session
 
@@ -15,21 +16,20 @@ saying_router = APIRouter(tags=["Sayings"])
 
 
 ## CRUD START ############################################################################################## 
+
 @saying_router.get("", response_model=dict)
-async def retrieve_all_sayings(p: int=Query(default=1), session=Depends(get_session)) -> dict:
+async def retrieve_all_sayings(p: int=Query(default=1), size: int=Query(default=15), session=Depends(get_session)) -> dict:
     """
     저장된 명언 데이터들 조회
     """
     # 페이징 처리
-    page = p
-    unit_per_page = 15  # 페이지당 보여질 데이터 수
-    offset = (page - 1) * unit_per_page
-    statement = select(Saying).offset(offset).limit(unit_per_page).order_by(Saying.id.desc())
+    statement = select(Saying)
+    statement = paging(page=p, size=size, Table=Saying, statement=statement)  # tools/pagination.py 페이지 처리 툴
     sayings = session.exec(statement).all()
 
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count(Saying.id))).one()
-    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+    total_page = (total_record // size) + bool(total_record % size)
 
     return {
         "total_page": total_page,
@@ -114,45 +114,36 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
     )
 ## CRUD END ##############################################################################################
 
-# 프론트엔드 서버에서 쿼리가 잘 날아오는지 확인하기 위한 코드
-# @saying_router.get("/filter/")
-# async def saying_filtering(categories: Optional[List[str]]=Query(default=None), session=Depends(get_session)):
-#     with open("./logs/log.txt", "a", encoding="UTF-8") as f:
-#         f.write("카테고리"+str(categories)+"\n\n")
-        
-#     return categories
-
-
 # 필터링 라우터 함수
 @saying_router.get("/filter/", response_model=dict)
 async def saying_filtering(
         categories: Optional[List[str]]=Query(default=None),
         keyword: Optional[str]=Query(default=None),
-        chars: Optional[List[str]]=Query(default=None),
+        consonants: Optional[List[str]]=Query(default=None),
         p: int=Query(default=1),
+        size: int=Query(default=15),
         session=Depends(get_session)
         ) -> dict:
 
     statement = select(Saying)
-    if categories:
+
+    if categories:  # 카테고리 필터링 됐다면,
         conditions = [Saying.category==cat for cat in categories]
         statement = statement.where(or_(*conditions))
-    if keyword:
+
+    if keyword:  # 검색어 필터링 됐다면,
         statement = statement.where(or_(Saying.contents_kr.like(f"%{keyword}%"), Saying.contents_eng.like(f"%{keyword}%")))
-    if chars:
-        conditions = [Saying.contents_eng.ilike(f"{char}%") for char in chars]
+
+    if consonants:  # 알파벳 필터링 됐다면,
+        conditions = [Saying.contents_eng.ilike(f"{consonant}%") for consonant in consonants]
         statement = statement.where(or_(*conditions))
 
     # 페이징 처리
-    page = p
-    unit_per_page = 15  # 페이지당 보여질 데이터 수
-    offset = (page - 1) * unit_per_page
-    statement = statement.offset(offset).limit(unit_per_page).order_by(Saying.id.desc())
-
+    statement = paging(page=p, size=size, Table=Saying, statement=statement)  # tools/pagination.py 페이지 처리 툴
     filtered_sayings = session.exec(statement).all()
 
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
-    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+    total_page = (total_record // size) + bool(total_record % size)
 
     return {"total_page": total_page, "content": filtered_sayings}

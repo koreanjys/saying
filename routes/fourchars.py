@@ -1,12 +1,13 @@
 # routes/fourchars.py
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
-from sqlmodel import select, delete, func, or_
+from sqlmodel import select, delete, func, or_, and_
 from typing import List, Optional
 from datetime import datetime, timedelta
 
 from models.fourchars import FourChar, FourCharUpdate
 from models.category import Category
+from tools.pagination import paging
 
 from database.connection import get_session
 
@@ -15,21 +16,21 @@ fourchar_router = APIRouter(tags=["FourChars"])
 
 
 ## CRUD START ############################################################################################## 
+
 @fourchar_router.get("", response_model=dict)
-async def retrieve_all_fourchars(p: int=Query(default=1), session=Depends(get_session)) -> dict:
+async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(default=15), session=Depends(get_session)) -> dict:
+
     """
     저장된 모든 사자성어들 조회
     """
     # 페이징 처리
-    page = p
-    unit_per_page = 15  # 페이지당 보여질 데이터 수
-    offset = (page - 1) * unit_per_page
-    statement = select(FourChar).offset(offset).limit(unit_per_page).order_by(FourChar.id.desc())
+    statement = select(FourChar)
+    statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     fourchars = session.exec(statement).all()
 
     # 토탈페이지 확인
     total_record = session.exec(select(func.count(FourChar.id))).one()
-    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
+    total_page = (total_record // size) + bool(total_record % size)
 
     return {
         "total_page": total_page,
@@ -114,65 +115,51 @@ async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
     )
 ## CRUD END ##############################################################################################
 
-# 프론트엔드에서 쿼리가 잘 날아오는지 확인하기 위한 코드
-"""
-@fourchar_router.get("/filter/")
-async def fourchar_filtering(keyword: Optional[str]=Query(default=None), session=Depends(get_session)):
-
-    with open("./logs/log.txt", "a", encoding="UTF-8") as f:
-        f.write("키워드"+str(keyword)+"\n\n")
-        
-    return keyword
-"""
-
-
 # 필터링 라우터 함수
 @fourchar_router.get("/filter/", response_model=dict)
 async def fourchar_filtering(
         categories: Optional[List[str]]=Query(default=None),
         keyword: Optional[str]=Query(default=None),
-        chars: Optional[List[str]]=Query(default=None),
+        consonants: Optional[List[str]]=Query(default=None),
         p: int=Query(default=1),
+        size: int=Query(default=15),
         session=Depends(get_session)
         ) -> dict:
-
     statement = select(FourChar)
-    if categories:
+
+    if categories:  # 카테고리 필터가 됐다면,
         conditions = [FourChar.category==cat for cat in categories]
         statement = statement.where(or_(*conditions))
-    if keyword:
-        statement = statement.where(FourChar.contents_divided.like(f"%{keyword}%"))
-    if chars:
+
+    if keyword:  # 검색어 필터가 됐다면,
+        statement = statement.where(or_(FourChar.contents_divided.like(f"%{keyword}%"), FourChar.contents_kr.like(f"%{keyword}%")))
+
+    if consonants:  # 초성 필터가 됐다면,
         ranges = {
-                "ㄱ": ("가", "깋"),
-                "ㄴ": ("나", "닣"),
-                "ㄷ": ("다", "딯"),
-                "ㄹ": ("라", "맇"),
-                "ㅁ": ("마", "밓"),
-                "ㅂ": ("바", "빟"),
-                "ㅅ": ("사", "싷"),
-                "ㅇ": ("아", "잏"),
-                "ㅈ": ("자", "짛"),
-                "ㅊ": ("차", "칳"),
-                "ㅋ": ("카", "킿"),
-                "ㅌ": ("타", "팋"),
-                "ㅍ": ("파", "핗"),
+                "ㄱ": ("가", "나"),
+                "ㄴ": ("나", "다"),
+                "ㄷ": ("다", "라"),
+                "ㄹ": ("라", "마"),
+                "ㅁ": ("마", "바"),
+                "ㅂ": ("바", "사"),
+                "ㅅ": ("사", "아"),
+                "ㅇ": ("아", "자"),
+                "ㅈ": ("자", "차"),
+                "ㅊ": ("차", "카"),
+                "ㅋ": ("카", "타"),
+                "ㅌ": ("타", "파"),
+                "ㅍ": ("파", "하"),
                 "ㅎ": ("하", "힣"),
                 }
-
-        conditions = [FourChar.contents_kr.like(f"{char}%") for char in chars]
+        conditions = [and_(ranges[consonant][0] <= FourChar.contents_kr, FourChar.contents_kr < ranges[consonant][1]) for consonant in consonants]
         statement = statement.where(or_(*conditions))
 
     # 페이징 처리
-    page = p
-    unit_per_page = 15  # 페이지당 보여질 데이터 수
-    offset = (page - 1) * unit_per_page
-    statement = statement.offset(offset).limit(unit_per_page).order_by(FourChar.id.desc())
-
+    statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     filtered_fourchars = session.exec(statement).all()
 
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
-    total_page = (total_record // unit_per_page) + bool(total_record % unit_per_page)
-
+    total_page = (total_record // size) + bool(total_record % size)
+    
     return {"total_page": total_page, "content": filtered_fourchars}
