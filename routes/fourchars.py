@@ -23,14 +23,21 @@ async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(defaul
     """
     저장된 모든 사자성어들 조회
     """
-    # 페이징 처리
-    statement = select(FourChar)
-    statement = paging(page=p, size=size, Table=FourChar, statement=statement)
-    fourchars = session.exec(statement).all()
-
     # 토탈페이지 확인
     total_record = session.exec(select(func.count(FourChar.id))).one()
     total_page = (total_record // size) + bool(total_record % size)
+    
+    # 페이징 처리
+    if p < 1:
+        p = 1
+    elif total_page < 1:
+        total_page = 1
+        p = 1
+    elif p > total_page:
+        p = total_page
+    statement = select(FourChar)
+    statement = paging(page=p, size=size, Table=FourChar, statement=statement)
+    fourchars = session.exec(statement).all()
 
     return {
         "total_rows": total_record,
@@ -126,6 +133,7 @@ async def fourchar_filtering(
         size: int=Query(default=15),
         session=Depends(get_session)
         ) -> dict:
+    
     statement = select(FourChar)
 
     if categories:  # 카테고리 필터가 됐다면,
@@ -160,8 +168,18 @@ async def fourchar_filtering(
     total_page = (total_record // size) + bool(total_record % size)
     
     # 페이징 처리
+    if p < 1:
+        p = 1
+    elif total_page < 1:
+        total_page = 1
+        p = 1
+    elif p > total_page:
+        p = total_page
     statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     filtered_fourchars = session.exec(statement).all()
+
+    if not filtered_fourchars:
+        filtered_fourchars = {}  # 빈 값을 null -> 빈 dict로 변경
 
     return {
         "total_rows": total_record,
