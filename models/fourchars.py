@@ -5,12 +5,13 @@ from sqlmodel import Field, SQLModel
 
 from datetime import datetime, timedelta
 
+
 # datetime의 출력 형태를 설정
 def current_time_kst():
     return (datetime.utcnow() + timedelta(hours=9)).replace(microsecond=0)  # UTC + 9시간 = 한국 시간
 
 
-class FourChar(SQLModel, table=True):  # 사자성어 테이블 클래스
+class FourChar(SQLModel, table=True):  # 사자성어 테이블 모델 클래스
 
     # PK_ID
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -49,7 +50,7 @@ class FourChar(SQLModel, table=True):  # 사자성어 테이블 클래스
     }
 
 
-class FourCharUpdate(SQLModel):
+class FourCharUpdate(SQLModel):  # 사자성어 수정 모델 클래스
     url_name: Optional[str] = None
     contents_kr: Optional[str] = None
     contents_detail: Optional[str] = None
@@ -61,7 +62,6 @@ class FourCharUpdate(SQLModel):
     author: Optional[str] = None
     continent: Optional[str] = None
     use_yn: Optional[int] = None
-    # update_at: datetime = Field(default_factory=current_time_kst, nullable=False)  # 여기서 설정해도 적용이 안되므로 router의 update 함수에서 직접 값을 추가
 
     # 모델 설정
     model_config = {

@@ -14,8 +14,8 @@ from database.connection import get_session
 category_router = APIRouter(tags=["Category"])
 
 
-@category_router.get("/")
-async def retrieve_all_categories(select_category: str=Query(...), session=Depends(get_session)):
+@category_router.get("/")  # GET READ 모든 select_category(saying or fourchar)의 카테고리들
+async def retrieve_all_categories(select_category: str=Query(default=None), session=Depends(get_session)):
     if select_category == "fourchar":
         statement = select(Category.fourchar_categories).where(Category.fourchar_categories.isnot(None))
     else:
@@ -25,6 +25,9 @@ async def retrieve_all_categories(select_category: str=Query(...), session=Depen
 
 
 # 카테고리 테이블 업데이트 URL
+"""
+/category/new_all 에 접속만 해도 자동으로 카테고리 테이블 요소들을 생성
+"""
 @category_router.get("/new_all")
 async def new_all_categories(session=Depends(get_session)) -> dict:
     """

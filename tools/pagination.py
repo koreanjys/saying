@@ -2,9 +2,6 @@
 """
 페이지 처리
 """
-from sqlmodel import select, delete, func, or_, and_
-
-
 def paging(page, size, Table, statement):  # 페이징 처리 함수
     if page < 1:
         page = 1

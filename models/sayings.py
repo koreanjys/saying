@@ -5,14 +5,13 @@ from sqlmodel import Field, SQLModel
 
 from datetime import datetime, timedelta
 
-from models.category import Category
 
 # datetime의 출력 형태를 설정
 def current_time_kst():
     return (datetime.utcnow() + timedelta(hours=9)).replace(microsecond=0)  # UTC + 9시간 = 한국 시간
 
 
-class Saying(SQLModel, table=True):  # 명언 테이블 클래스
+class Saying(SQLModel, table=True):  # 명언 테이블 모델 클래스
 
     # PK_ID
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -49,7 +48,7 @@ class Saying(SQLModel, table=True):  # 명언 테이블 클래스
     }
 
 
-class SayingUpdate(SQLModel):
+class SayingUpdate(SQLModel):  # 명언 수정 모델 클래스
     contents_kr: Optional[str] = None   # 수정 필드
     category: Optional[str] = None      # 수정 필드
     contents_eng: Optional[str] = None  # 수정 필드
@@ -61,7 +60,6 @@ class SayingUpdate(SQLModel):
     contents_divided: Optional[str] = None
     continent: Optional[str] = None
     use_yn: Optional[int] = None
-    # update_at: datetime = Field(default_factory=current_time_kst, nullable=False)  # 여기서 설정해도 적용이 안되므로 /routes/~.py의 update 함수에서 직접 값을 추가하도록 했음
 
     # 모델 설정
     model_config = {
@@ -74,7 +72,3 @@ class SayingUpdate(SQLModel):
             }
         }
     }
-
-
-class SayingFilter(SQLModel):
-    pass
