@@ -17,7 +17,7 @@ fourchar_router = APIRouter(tags=["FourChars"])
 
 ## CRUD START ############################################################################################## 
 
-@fourchar_router.get("", response_model=dict)
+@fourchar_router.get("", response_model=dict)  # GET READ 모든 사자성어 데이터들
 async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(default=15), session=Depends(get_session)) -> dict:
 
     """
@@ -41,7 +41,7 @@ async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(defaul
     }
 
 
-@fourchar_router.get("/{id}", response_model=FourChar)
+@fourchar_router.get("/{id}", response_model=FourChar)  # GET READ 단일 사자성어 데이터
 async def retrieve_fourchar(id: int, session=Depends(get_session)) -> FourChar:
     """
     사자성어 조회
@@ -56,7 +56,7 @@ async def retrieve_fourchar(id: int, session=Depends(get_session)) -> FourChar:
     )
 
 
-@fourchar_router.post("/new", response_model=FourChar)
+@fourchar_router.post("/new", response_model=FourChar)  # POST CREATE 새 사자성어 데이터
 async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_session)) -> FourChar:
     """
     사자성어 새로 생성
@@ -78,7 +78,7 @@ async def create_new_fourchar(new_fourchar: FourChar, session=Depends(get_sessio
     return new_fourchar
 
 
-@fourchar_router.put("/edit/{id}", response_model=FourChar)
+@fourchar_router.put("/edit/{id}", response_model=FourChar)  # PUT UPDATE 기존 사자성어 데이터
 async def update_fourchar(id: int, new_data: FourCharUpdate, session=Depends(get_session)) -> FourChar:
     """
     사자성어 수정
@@ -99,7 +99,7 @@ async def update_fourchar(id: int, new_data: FourCharUpdate, session=Depends(get
         detail="선택한 ID를 가진 사자성어가 존재하지 않습니다."
     )
 
-@fourchar_router.delete("/delete/{id}")
+@fourchar_router.delete("/delete/{id}")  # DELETE 기존 사자성어 데이터
 async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
     """
     사자성어 삭제
@@ -119,6 +119,10 @@ async def delete_fourchar(id: int, session=Depends(get_session)) -> dict:
 ## CRUD END ##############################################################################################
 
 # 필터링 라우터 함수
+"""
+카테고리들(List), 검색어(Str), 초성 첫글자들(List)
+필터링 해주는 함수
+"""
 @fourchar_router.get("/filter/", response_model=dict)
 async def fourchar_filtering(
         categories: List[str]=Query(default=None),

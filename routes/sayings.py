@@ -17,7 +17,7 @@ saying_router = APIRouter(tags=["Sayings"])
 
 ## CRUD START ############################################################################################## 
 
-@saying_router.get("", response_model=dict)
+@saying_router.get("", response_model=dict)  # GET READ 모든 명언 데이터들
 async def retrieve_all_sayings(p: int=Query(default=1), size: int=Query(default=15), session=Depends(get_session)) -> dict:
     """
     저장된 명언 데이터들 조회
@@ -40,7 +40,7 @@ async def retrieve_all_sayings(p: int=Query(default=1), size: int=Query(default=
     }
 
 
-@saying_router.get("/{id}", response_model=Saying)
+@saying_router.get("/{id}", response_model=Saying)  # GET READ 단일 명언 데이터
 async def retrieve_saying(id: int, session=Depends(get_session)) -> Saying:
     """
     데이터 조회
@@ -55,7 +55,7 @@ async def retrieve_saying(id: int, session=Depends(get_session)) -> Saying:
     )
 
 
-@saying_router.post("/new", response_model=Saying)
+@saying_router.post("/new", response_model=Saying)  # POST CREATE 새 명언 데이터
 async def create_new_saying(new_saying: Saying, session=Depends(get_session)) -> Saying:
     """
     데이터 새로 생성
@@ -77,7 +77,7 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
     return new_saying
 
 
-@saying_router.put("/edit/{id}", response_model=Saying)
+@saying_router.put("/edit/{id}", response_model=Saying)  # PUT UPDATE 기존 명언 데이터
 async def update_saying(id: int, new_data: SayingUpdate, session=Depends(get_session)) -> Saying:
     """
     데이터 수정
@@ -98,7 +98,7 @@ async def update_saying(id: int, new_data: SayingUpdate, session=Depends(get_ses
         detail="선택한 ID를 가진 데이터이 존재하지 않습니다."
     )
 
-@saying_router.delete("/delete/{id}")
+@saying_router.delete("/delete/{id}")  # DELETE 기존 명언 데이터
 async def delete_saying(id: int, session=Depends(get_session)) -> dict:
     """
     데이터 삭제
@@ -118,6 +118,10 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
 ## CRUD END ##############################################################################################
 
 # 필터링 라우터 함수
+"""
+카테고리들(List), 검색어(Str), 알파벳 첫글자들(List)
+필터링 해주는 함수
+"""
 @saying_router.get("/filter/", response_model=dict)
 async def saying_filtering(
         categories: List[str]=Query(default=None),
