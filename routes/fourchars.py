@@ -26,15 +26,10 @@ async def retrieve_all_fourchars(p: int=Query(default=1), size: int=Query(defaul
     # 토탈페이지 확인
     total_record = session.exec(select(func.count(FourChar.id))).one()
     total_page = (total_record // size) + bool(total_record % size)
+    if p > total_page:
+        p = total_page
     
     # 페이징 처리
-    if p < 1:
-        p = 1
-    elif total_page < 1:
-        total_page = 1
-        p = 1
-    elif p > total_page:
-        p = total_page
     statement = select(FourChar)
     statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     fourchars = session.exec(statement).all()
@@ -166,20 +161,12 @@ async def fourchar_filtering(
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count()).select_from(statement)).one()
     total_page = (total_record // size) + bool(total_record % size)
+    if p > total_page:
+        p = total_page
     
     # 페이징 처리
-    if p < 1:
-        p = 1
-    elif total_page < 1:
-        total_page = 1
-        p = 1
-    elif p > total_page:
-        p = total_page
     statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     filtered_fourchars = session.exec(statement).all()
-
-    if not filtered_fourchars:
-        filtered_fourchars = {}  # 빈 값을 null -> 빈 dict로 변경
 
     return {
         "total_rows": total_record,

@@ -25,15 +25,10 @@ async def retrieve_all_sayings(p: int=Query(default=1), size: int=Query(default=
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count(Saying.id))).one()
     total_page = (total_record // size) + bool(total_record % size)
+    if p > total_page:
+        p = total_page
 
     # 페이징 처리
-    if p < 1:
-        p = 1
-    elif total_page < 1:
-        total_page = 1
-        p = 1
-    elif p > total_page:
-        p = total_page
     statement = select(Saying)
     statement = paging(page=p, size=size, Table=Saying, statement=statement)  # tools/pagination.py 페이지 처리 툴
     sayings = session.exec(statement).all()
@@ -149,21 +144,13 @@ async def saying_filtering(
     # 토탈 페이지 확인
     total_record = session.exec(select(func.count()).select_from(statement)).one()
     total_page = (total_record // size) + bool(total_record % size)
+    if p > total_page:
+        p = total_page
     
     # 페이징 처리
-    if p < 1:
-        p = 1
-    elif total_page < 1:
-        total_page = 1
-        p = 1
-    elif p > total_page:
-        p = total_page
     statement = paging(page=p, size=size, Table=Saying, statement=statement)  # tools/pagination.py 페이지 처리 툴
     filtered_sayings = session.exec(statement).all()
     
-    if not filtered_sayings:
-        filtered_sayings = {}  # 빈 값을 null -> 빈 dict로 변경
-
     return {
         "total_rows": total_record,
         "total_page": total_page,
