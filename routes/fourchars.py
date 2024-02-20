@@ -155,14 +155,14 @@ async def fourchar_filtering(
         conditions = [and_(ranges[consonant][0] <= FourChar.contents_kr, FourChar.contents_kr < ranges[consonant][1]) for consonant in consonants]
         statement = statement.where(or_(*conditions))
 
+    # 토탈 페이지 확인
+    total_record = session.exec(select(func.count()).select_from(statement)).one()
+    total_page = (total_record // size) + bool(total_record % size)
+    
     # 페이징 처리
     statement = paging(page=p, size=size, Table=FourChar, statement=statement)
     filtered_fourchars = session.exec(statement).all()
 
-    # 토탈 페이지 확인
-    total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
-    total_page = (total_record // size) + bool(total_record % size)
-    
     return {
         "total_rows": total_record,
         "total_page": total_page,

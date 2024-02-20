@@ -139,13 +139,13 @@ async def saying_filtering(
         conditions = [Saying.contents_eng.ilike(f"{consonant}%") for consonant in consonants]
         statement = statement.where(or_(*conditions))
 
+    # 토탈 페이지 확인
+    total_record = session.exec(select(func.count()).select_from(statement)).one()
+    total_page = (total_record // size) + bool(total_record % size)
+    
     # 페이징 처리
     statement = paging(page=p, size=size, Table=Saying, statement=statement)  # tools/pagination.py 페이지 처리 툴
     filtered_sayings = session.exec(statement).all()
-
-    # 토탈 페이지 확인
-    total_record = session.exec(select(func.count()).where(statement._whereclause)).one()
-    total_page = (total_record // size) + bool(total_record % size)
 
     return {
         "total_rows": total_record,
