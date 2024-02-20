@@ -120,9 +120,9 @@ async def delete_saying(id: int, session=Depends(get_session)) -> dict:
 # 필터링 라우터 함수
 @saying_router.get("/filter/", response_model=dict)
 async def saying_filtering(
-        categories: Optional[List[str]]=Query(default=None),
-        keyword: Optional[str]=Query(default=None),
-        consonants: Optional[List[str]]=Query(default=None),
+        categories: List[str]=Query(default=None),
+        keyword: str=Query(default=None),
+        consonants: List[str]=Query(default=None),
         p: int=Query(default=1),
         size: int=Query(default=15),
         session=Depends(get_session)
