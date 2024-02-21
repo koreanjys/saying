@@ -17,15 +17,15 @@ class Saying(SQLModel, table=True):  # 명언 테이블 모델 클래스
     id: Optional[int] = Field(default=None, primary_key=True)
 
     # 사용 필드
-    category: str = Field(index=True)                   # 카테고리*
-    author: str                                         # 발화자*
-    contents_kr: str = Field(index=True)                # 뜻 풀이*
-    contents_eng: str = Field(index=True, default="")   # 영문 명언
+    category: str = Field(index=True, nullable=False)      # 카테고리*
+    author: str = Field(index=True, nullable=False)        # 발화자*
+    contents_kr: str = Field(index=True, nullable=False)   # 뜻 풀이*
+    contents_eng: str = Field(index=True, default="")      # 영문 명언
 
     # 자동생성 필드
     type_id: int = 0
     use_yn: int = 1
-    created_at: datetime = Field(default_factory=current_time_kst)
+    created_at: datetime = Field(default_factory=current_time_kst, nullable=True)
 
     # 미사용 필드
     contents_detail: str = ""
