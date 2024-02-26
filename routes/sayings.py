@@ -60,12 +60,15 @@ async def create_new_saying(new_saying: Saying, session=Depends(get_session)) ->
     """
     데이터 새로 생성
     """
+    if new_saying.category == "선택":
+        new_saying.category = ""  # TODO: 공백
+    
     category_name = new_saying.category
 
     statement = select(Category).where(Category.saying_categories == category_name)
     category = session.exec(statement).first()
 
-    if not category:
+    if not category:  # 카테고리명이 없으면 새로 생성
         category = Category(saying_categories=category_name)
         session.add(category)
         session.commit()
@@ -82,6 +85,8 @@ async def update_saying(id: int, new_data: SayingUpdate, session=Depends(get_ses
     """
     데이터 수정
     """
+    if new_data.category == "선택":
+        new_data.category = ""  # TODO: 공백
     saying = session.get(Saying, id)
     if saying:
         saying_data = new_data.model_dump(exclude_unset=True)  # 클라이언트가 작성한 데이터만 변경하는 dict 생성
@@ -131,9 +136,11 @@ async def saying_filtering(
         size: int=Query(default=15),
         session=Depends(get_session)
         ) -> dict:
-    if "선택" in categories:  # "선택"이 카테고리 필터에 포함됐으면, 다시 ""으로 바꿔줌
+    ########################################
+    if "선택" in categories:  # TODO: 공백
         idx = categories.index("선택")
         categories[idx] = ""
+    ########################################
     
     statement = select(Saying)
 
