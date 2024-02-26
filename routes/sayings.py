@@ -131,6 +131,9 @@ async def saying_filtering(
         size: int=Query(default=15),
         session=Depends(get_session)
         ) -> dict:
+    if "선택" in categories:  # "선택"이 카테고리 필터에 포함됐으면, 다시 ""으로 바꿔줌
+        idx = categories.index("선택")
+        categories[idx] = ""
     
     statement = select(Saying)
 

@@ -21,7 +21,7 @@ async def retrieve_all_categories(select_category: str=Query(default=None), sess
     else:
         statement = select(Category.saying_categories).where(Category.saying_categories.isnot(None)).order_by(Category.saying_categories.asc())
     categories = session.exec(statement).all()
-    if categories[0] == "":
+    if categories[0] == "":  # 화면에 공백으로 보이는것을 "선택"으로 보이도록 수정
         categories[0] = "선택"
     return categories
 
