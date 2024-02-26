@@ -140,7 +140,7 @@ async def fourchar_filtering(
         statement = statement.where(or_(*conditions))
 
     if keyword:  # 검색어 필터가 됐다면,
-        statement = statement.where(or_(FourChar.contents_detail.like(f"%{keyword}%"), FourChar.contents_kr.like(f"%{keyword}%")))
+        statement = statement.where(or_(FourChar.contents_detail.like(f"%{keyword}%"), FourChar.contents_kr.like(f"%{keyword}%"), FourChar.contents_zh.like(f"%{keyword}%")))
 
     if consonants:  # 초성 필터가 됐다면,
         ranges = {
