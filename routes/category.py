@@ -17,9 +17,9 @@ category_router = APIRouter(tags=["Category"])
 @category_router.get("/")  # GET READ 모든 select_category(saying or fourchar)의 카테고리들
 async def retrieve_all_categories(select_category: str=Query(default=None), session=Depends(get_session)):
     if select_category == "fourchar":
-        statement = select(Category.fourchar_categories).where(Category.fourchar_categories.isnot(None))
+        statement = select(Category.fourchar_categories).where(Category.fourchar_categories.isnot(None)).order_by(Category.fourchar_categories.asc())
     else:
-        statement = select(Category.saying_categories).where(Category.saying_categories.isnot(None))
+        statement = select(Category.saying_categories).where(Category.saying_categories.isnot(None)).order_by(Category.saying_categories.asc())
     categories = session.exec(statement).all()
     return categories
 
