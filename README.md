@@ -77,4 +77,4 @@ UVICORN_PORT=8000
 
 - 명언 루트
 
-![alt text](Saying_route.png)
+![alt text](saying_route.png)
