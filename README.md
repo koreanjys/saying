@@ -49,6 +49,8 @@ UVICORN_PORT=8000
 ```
 
 ## 2. DB 테이블
+- 사용하지 않는 필드라도 같은 구조여야 python 코드와 연동이 됨*
+- DB 테이블 구조
 
 ### 2.1 saying
 명언 테이블
@@ -58,3 +60,21 @@ UVICORN_PORT=8000
 ### 2.2 fouchar
 사자성어 테이블
 
+![alt text](fourchar_table.png)
+
+### 2.3 category
+카테고리 테이블
+
+![alt text](category_table.png)
+
+## 3. 컴포넌트 구조 및 플로우 차트
+
+### 3.1 구조
+
+![alt text](Backend.png)
+
+### 3.2 플로우 차트
+
+- 명언 루트
+
+![alt text](Saying_route.png)
