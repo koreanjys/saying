@@ -78,3 +78,28 @@ UVICORN_PORT=8000
 - 명언 루트
 
 ![alt text](saying_route.png)
+
+- 사자성어 루트
+
+![alt text](fourchar_route.png)
+
+- 카테고리 루트
+
+![alt text](category_route.png)
+
+## 4. 서버 실행 방법
+
+- .env파일에 환경변수를 알맞게 입력
+- main.py 파일이 있는 경로에서 main.py를 실행
+
+### 4.1 windows 실행
+```
+$ python main.py
+```
+
+### 4.2 linux 실행
+```
+# python3.8 버전이라면
+
+$ python3.8 main.py
+```
