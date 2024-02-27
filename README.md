@@ -51,3 +51,10 @@ UVICORN_PORT=8000
 ## 2. DB 테이블
 
 ### 2.1 saying
+명언 테이블
+
+![alt text](saying_table.png)
+
+### 2.2 fouchar
+사자성어 테이블
+
