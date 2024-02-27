@@ -21,10 +21,6 @@ async def retrieve_all_categories(select_category: str=Query(default=None), sess
     else:
         statement = select(Category.saying_categories).where(Category.saying_categories.isnot(None)).order_by(Category.saying_categories.asc())
     categories = session.exec(statement).all()
-    ########################################
-    if categories[0] == "":  # TODO: 공백
-        categories[0] = "선택"
-    ########################################
     return categories
 
 
