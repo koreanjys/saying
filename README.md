@@ -104,3 +104,16 @@ $ python main.py
 
 $ python3.8 main.py
 ```
+
+## 5. 필터링 설명
+
+### 5.1 fouchar/filter/
+- categories query -> fourchar 테이블의 category 필드를 참조
+- consonents query -> fourchar 테이블의 contents_kr 필드를 참조
+- keyword query -> fourchar 테이블의 contents_zh, contents_kr, contents_detail 필드들을 참조
+
+### 5.2 saying/filter/
+
+- categories query -> saying 테이블의 category 필드를 참조
+- consonents query -> saying 테이블의 contents_en 필드를 참조
+- keyword query -> saying 테이블의 contents_en, contents_kr 필드들을 참조
