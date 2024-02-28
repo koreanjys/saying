@@ -50,7 +50,8 @@ UVICORN_PORT=8000
 
 ## 2. DB 테이블
 - 사용하지 않는 필드라도 같은 구조여야 python 코드와 연동이 됨*
-- DB 테이블 구조
+- main.py를 실행하면 자동으로 MySQL의 DB에 [saying, fourchar, category] 테이블들이 생성됨
+- 초기 필드는 모두 null값이 가능(데이터를 import 하기 위해서)
 
 ### 2.1 saying
 명언 테이블

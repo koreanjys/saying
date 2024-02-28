@@ -17,23 +17,23 @@ class FourChar(SQLModel, table=True):  # 사자성어 테이블 모델 클래스
     id: Optional[int] = Field(default=None, primary_key=True)
 
     # 사용 필드
-    contents_kr: str = Field(index=True, nullable=False)       # 사자성어(한글)*
-    category: str = Field(index=True, nullable=False)          # 카테고리*
-    contents_detail: str = Field(index=True, nullable=False)   # 뜻 풀이*
-    contents_zh: str = ""                                      # 사자성어(한문)
+    contents_kr: str = Field(index=True, nullable=True)       # 사자성어(한글)*
+    category: str = Field(index=True, nullable=True)          # 카테고리*
+    contents_detail: str = Field(index=True, nullable=True)   # 뜻 풀이*
+    contents_zh: Optional[str] = ""                                      # 사자성어(한문)
 
     # 자동생성 필드
-    type_id: int = 1
-    use_yn: int = 1
+    type_id: Optional[int] = 1
+    use_yn: Optional[int] = 1
     created_at: datetime = Field(default_factory=current_time_kst, nullable=True)
     
 
     # 미사용 필드
-    contents_divided: str = ""
-    url_name: str = ""
-    contents_eng: str = ""
-    author: str = ""
-    continent: str = ""
+    contents_divided: Optional[str] = ""
+    url_name: Optional[str] = ""
+    contents_eng: Optional[str] = ""
+    author: Optional[str] = ""
+    continent: Optional[str] = ""
     updated_at: Optional[datetime] = None
 
 
