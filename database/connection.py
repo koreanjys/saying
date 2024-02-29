@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 
-# 데이터베이스 접속 환경설정
+# 데이터베이스와 연결 환경설정
 class Settings(BaseSettings):
     DATABASE_CONNECTION_STRING: Optional[str] = None  # DB 연결주소, .env파일에서 불러온다.
     UVICORN_IP: Optional[str] = None  # uvicorn ip번호
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
 
 def conn():
-    SQLModel.metadata.create_all(engine_url)  # DB 연결 및 초기화
+    SQLModel.metadata.create_all(engine_url)  # DB 연결 및 테이블 생성
 
 
 # 세션을 관리하는 함수. FastAPI의 Depends()와 함께 사용하면 관리가 용이
